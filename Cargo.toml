@@ -3,5 +3,9 @@ name = "tetani"
 version = "0.1.0"
 authors = ["Jorge Timón <jtimon@jtimon.cc>"]
 edition = "2018"
+description = "A bioinspired library written in rust."
+license = "MIT"
 
 [dependencies]
+
+rand = "0.6"
