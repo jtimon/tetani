@@ -1,16 +1,16 @@
 use std::io;
 
 use tetani::digital::{
+    BinaryTask,
     BinOp,
     ProgrammableLogicArray,
-    binop_2str,
-    calculate_fitness_result,
-    calculate_result,
-    get_null_bitvector,
-    get_rand_bitvector,
-    print_bitvector,
 };
-use tetani::genetic::Individual;
+
+use tetani::genetic::{
+    Individual,
+    Population,
+    Task,
+};
 
 fn main() {
     println!("Let's operate with 2 binary vectors, how many bits?");
@@ -18,55 +18,25 @@ fn main() {
     println!("What binary operation? 0: AND, 1: OR, 2: XOR 3: NOR");
     let operation_type : BinOp = input_2binop(get_input(0, 3));
 
-    let v_a = get_null_bitvector(vector_size);
-    let v_b = get_rand_bitvector(vector_size);
-    let mut input = v_a.clone();
-    input.extend(&v_b);
-    let input_len = input.len();
-    assert_eq!(input_len, vector_size * 2);
+    let bin_task = BinaryTask::new(vector_size, operation_type);
 
-    // END INPUT ----------------------------------------------------------
-
-    let v_result = calculate_result(&operation_type, &v_a, &v_b);
-    assert_eq!(vector_size as i32, calculate_fitness_result(&v_result, &v_result));
-
-    let population_size = 4;
-    // let mut pop: Population<ProgrammableLogicArray> = Population<ProgrammableLogicArray>(population_size);
-    let mut pla: Vec<ProgrammableLogicArray> = Vec::with_capacity(population_size);
-
-    pla.push(ProgrammableLogicArray::new_null(input_len, vector_size));
-    pla.push(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 10));
-    pla.push(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32));
-    pla.push(ProgrammableLogicArray::new_rand(input_len, vector_size));
-
-    let mut pla_results: Vec<Vec<bool>> = Vec::with_capacity(population_size);
-    for individual in pla.iter() {
-        pla_results.push(individual.calculate_output(&input));
-    }
-
-    println!("----------------------------------------------------------");
-    println!("Genotypes:");
-    for i in 0..population_size {
-        println!("Individual {}:", i);
-        pla[i].print();
-    }
     println!("----------------------------------------------------------");
     println!("Fenotypes:");
     println!("MAX  fitness: {}", vector_size);
-    for i in 0..population_size {
-        println!("PLA{} fitness: {}", i, calculate_fitness_result(&v_result, &pla_results[i]));
-    }
+    let population_size = 4;
+    let input_len = bin_task.input.len();
+    let mut pop : Population<ProgrammableLogicArray, BinaryTask> = Population::new(bin_task, population_size);
+
+    // pop.add_and_rate_individual(ProgrammableLogicArray::new_null(input_len, vector_size));
+    pop.add_and_rate_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 2));
+    pop.add_and_rate_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 2));
+    pop.add_and_rate_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 4));
+    pop.add_and_rate_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 8));
+    // pop.add_and_rate_individual(ProgrammableLogicArray::new_rand(input_len, vector_size));
 
     println!("----------------------------------------------------------");
-    println!("Your choice was {} bits and operation {}", vector_size, binop_2str(operation_type));
-    println!("----------------------------------------------------------");
-    print!("input:  "); print_bitvector(&input);
-    print!("A:      "); print_bitvector(&v_a);
-    print!("B:      "); print_bitvector(&v_b);
-    print!("RESULT: "); print_bitvector(&v_result);
-    for i in 0..population_size {
-        print!("PLA{}:   ", i); print_bitvector(&pla_results[i]);
-    }
+    println!("Genotypes:");
+    pop.print();
 }
 
 pub fn input_2binop(input : u32) -> BinOp {

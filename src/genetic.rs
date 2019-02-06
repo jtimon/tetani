@@ -35,6 +35,14 @@ pub struct Population<I: Individual, T: Task> {
 impl<I, T> Population<I, T>
     where I: Individual + 'static, T: Task {
 
+    pub fn new(task: T, capacity: usize) -> Population<I, T> {
+        let pop : Vec< RatedIndividual<I> > = Vec::with_capacity(capacity);
+        Population{
+            task,
+            pop,
+        }
+    }
+
     pub fn add_rated_individual(&mut self, indi: RatedIndividual<I>) {
         self.pop.push(indi);
     }

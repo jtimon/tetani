@@ -1,6 +1,9 @@
 use rand::Rng;
 
-pub use crate::genetic::Individual;
+pub use crate::genetic::{
+    Individual,
+    Task,
+};
 
 pub enum BinOp {
     AND,
@@ -9,7 +12,7 @@ pub enum BinOp {
     NOR,
 }
 
-pub fn binop_2str<'a>(input : BinOp) -> &'a str {
+pub fn binop_2str<'a>(input : &BinOp) -> &'a str {
     match input {
         BinOp::AND => "AND",
         BinOp::OR => "OR",
@@ -342,4 +345,51 @@ fn print_limited_bitvector(v: &[bool], max: usize) {
         }
     }
     println!("");
+}
+
+pub struct BinaryTask {
+    vector_size : usize,
+    operation_type : BinOp,
+    // Temporary fields to remove:
+    pub input: Vec<bool>,
+    pub v_result: Vec<bool>,
+}
+
+impl BinaryTask {
+    pub fn new(vector_size : usize, operation_type : BinOp) -> BinaryTask {
+        let v_a = get_rand_bitvector(vector_size);
+        let v_b = get_rand_bitvector(vector_size);
+        let mut input = v_a.clone();
+        input.extend(&v_b);
+        let input_len = input.len();
+        assert_eq!(input_len, vector_size * 2);
+
+        let v_result = calculate_result(&operation_type, &v_a, &v_b);
+        assert_eq!(vector_size as i32, calculate_fitness_result(&v_result, &v_result));
+
+        println!("----------------------------------------------------------");
+        println!("Your choice was {} bits and operation {}", vector_size, binop_2str(&operation_type));
+        println!("----------------------------------------------------------");
+        print!("input:  "); print_bitvector(&input);
+        print!("A:      "); print_bitvector(&v_a);
+        print!("B:      "); print_bitvector(&v_b);
+        print!("RESULT: "); print_bitvector(&v_result);
+        let bin_task = BinaryTask{
+            vector_size,
+            operation_type,
+            input,
+            v_result,
+        };
+        bin_task
+    }
+}
+
+impl Task for BinaryTask {
+    fn calculate_fitness(&self, individual: &Individual) -> i32 {
+        let ind_result = individual.calculate_output(&self.input);
+        let fitness = calculate_fitness_result(&self.v_result, &ind_result);
+        println!("INDI fitness: {}", fitness);
+        print!("INDI:   "); print_bitvector(&ind_result);
+        fitness
+    }
 }
