@@ -163,11 +163,6 @@ impl Individual for ProgrammableLogicArray {
             output.push(false);
         }
 
-        println!("----------------------------------------------------------");
-        println!("or_column_size {}", or_column_size);
-        println!("or_column_size * {} = {}", out_size, or_column_size * out_size);
-        println!("----------------------------------------------------------");
-
         for j in 0..or_column_size {
 
             for i in 0..out_size {
@@ -176,9 +171,6 @@ impl Individual for ProgrammableLogicArray {
                 }
             }
 
-            println!("i: {}", j);
-            println!("output: {:?}", &output);
-            println!("and_matrix_row: {:?}", &and_matrix_row);
             if j < or_column_size - 1 {
                 increment_and_row(&mut and_matrix_row);
             }

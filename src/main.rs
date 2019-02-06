@@ -31,16 +31,15 @@ fn main() {
     pla.push(ProgrammableLogicArray::new_rand(input_len, vector_size));
 
     let mut pla_results: Vec<Vec<bool>> = Vec::with_capacity(population_size);
-    for i in 0..population_size {
-        println!("----------------------------------------------------------");
-        println!("Individual {}:", i);
-        pla_results.push(pla[i].calculate_output(&input));
+    for individual in pla.iter() {
+        pla_results.push(individual.calculate_output(&input));
     }
 
     println!("----------------------------------------------------------");
     println!("Genotypes:");
-    for individual in pla {
-        individual.print();
+    for i in 0..population_size {
+        println!("Individual {}:", i);
+        pla[i].print();
     }
     println!("----------------------------------------------------------");
     println!("Fenotypes:");
