@@ -1,5 +1,9 @@
 use rand::Rng;
 
+mod genetic;
+
+pub use crate::genetic::Individual;
+
 pub enum BinOp {
     AND,
     OR,
@@ -129,27 +133,23 @@ impl ProgrammableLogicArray {
         }
         pla
     }
+}
 
-    pub fn random_mutation(&mut self) {
+impl Individual for ProgrammableLogicArray {
+    fn random_mutation(&mut self) {
         let chosen_bit = rand::thread_rng().gen_range(0, self.or_matrix.len());
         let chosen_output = rand::thread_rng().gen_range(0, self.or_matrix[0].len());
         self.or_matrix[chosen_bit][chosen_output] = !self.or_matrix[chosen_bit][chosen_output];
     }
 
-    pub fn print(&self) {
+    fn print(&self) {
         let max_bitvector_print = 32;
         for i in 0..self.or_matrix.len() {
             print!("or matrix column {}:", i);
             print_limited_bitvector(&self.or_matrix[i], max_bitvector_print);
         }
     }
-}
 
-pub trait Individual {
-    fn calculate_output(&self, input: &Vec<bool>) -> Vec<bool>;
-}
-
-impl Individual for ProgrammableLogicArray {
     fn calculate_output(&self, input: &Vec<bool>) -> Vec<bool> {
         let in_size = input.len();
         let or_column_size = ProgrammableLogicArray::calculate_or_column_size(in_size);

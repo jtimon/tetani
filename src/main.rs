@@ -11,15 +11,18 @@ fn main() {
 
     let v_a = get_null_bitvector(vector_size);
     let v_b = get_rand_bitvector(vector_size);
-    let v_result = calculate_result(&operation_type, &v_a, &v_b);
-    assert_eq!(vector_size as i32, calculate_fitness_result(&v_result, &v_result));
-
     let mut input = v_a.clone();
     input.extend(&v_b);
     let input_len = input.len();
     assert_eq!(input_len, vector_size * 2);
 
+    // END INPUT ----------------------------------------------------------
+
+    let v_result = calculate_result(&operation_type, &v_a, &v_b);
+    assert_eq!(vector_size as i32, calculate_fitness_result(&v_result, &v_result));
+
     let population_size = 4;
+    // let mut pop: Population<ProgrammableLogicArray> = Population<ProgrammableLogicArray>(population_size);
     let mut pla: Vec<ProgrammableLogicArray> = Vec::with_capacity(population_size);
 
     pla.push(ProgrammableLogicArray::new_null(input_len, vector_size));
