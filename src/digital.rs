@@ -54,6 +54,28 @@ fn increment_and_row(and_row: &mut Vec<AndPseudoMatrixValue>) {
     panic!("AndPseudoMatrixValue vector overflow");
 }
 
+fn and_func_to_str(and_row: &Vec<AndPseudoMatrixValue>) -> String {
+    let mut to_return = String::new();
+    let mut first_added = true;
+
+    for i in 0..and_row.len() {
+        if and_row[i] != AndPseudoMatrixValue::NEITHER {
+            if first_added {
+                first_added = false;
+            } else {
+                to_return.push_str(" ⋅ ");
+            }
+        }
+        if and_row[i] == AndPseudoMatrixValue::REQUIRED {
+            to_return.push_str(&format!("a{}", i));
+        } else if and_row[i] == AndPseudoMatrixValue::COMPLEMENT {
+            to_return.push_str(&format!("¬a{}", i));
+        }
+    }
+
+    to_return
+}
+
 // returns true if all input requirements described in the and row are satisfied, false otherwise
 fn compare_and_row(and_row: &Vec<AndPseudoMatrixValue>, input: &Vec<bool>) -> bool {
     assert_eq!(and_row.len(), input.len());
@@ -72,20 +94,26 @@ fn compare_and_row(and_row: &Vec<AndPseudoMatrixValue>, input: &Vec<bool>) -> bo
     to_return
 }
 
-// https://en.wikipedia.org/wiki/Programmable_logic_array
-
-// Instead of having an and matrix of 2^(in_size * 2) x in_size, we'll have one with 3^in_size x in_size.
-// Because any and row in which the bits for a given input and its complement can be ignored.
-// we can also -1 because we can ignore the null vector.
-
+/// Programmable Logic Array:
+///
+/// https://en.wikipedia.org/wiki/Programmable_logic_array
+///
+/// Instead of having an and matrix of 2^(in_size * 2) x in_size, we'll have one with 3^in_size x in_size.
+/// Because any and row in which the bits for a given input and its complement can be ignored.
+/// we can also -1 because we can ignore the null vector.
+///
+/// In fact, there's no need to store it anywhere, it's just a matrix with all possible combinations of inputs,
+/// which can be cheaply reproduced programatically by simply iterating.
+///
+/// TODO: use the minimal representation, this one still has redundancies.
+/// For example: out0 = (a0) + (a0 + a1), it's equivalent to just out0 = (a0).
+/// This results in redudant different genotypes that result in equivalent fenotypes.
 pub struct ProgrammableLogicArray {
-    // input: [bool; in_size],
-    // no need to store the input, pass it as a reference to calculate_output
-    // pub input : Vec<bool>,
-    // and_matrix: [[bool; in_size]; 3^in_size-1],
-    // No need to store it anywhere, it's just a matrix with all possible combinations of inputs
-    // which can be cheaply reproduced programatically by iterating
-    // or_matrix: [[bool; 3^in_size-1]; out_size],
+    /// No need to store the input, pass it as a reference to calculate_output.
+    /// The input is expected to be Vec<bool> with the same size as stored or it will panic.
+    in_size: usize,
+    /// or_matrix: [[bool; 3^in_size-1]; out_size],
+    /// imaginary_and_matrix: [[bool; in_size]; 3^in_size-1],
     or_matrix: Vec< Vec<bool> >,
 }
 
@@ -98,6 +126,7 @@ impl ProgrammableLogicArray {
 
     pub fn new_null(in_size: usize, out_size: usize) -> ProgrammableLogicArray {
         let mut pla = ProgrammableLogicArray {
+            in_size: in_size,
             or_matrix: Vec::with_capacity(out_size),
         };
         let or_column_size = ProgrammableLogicArray::calculate_or_column_size(in_size);
@@ -109,6 +138,7 @@ impl ProgrammableLogicArray {
 
     pub fn new_rand(in_size: usize, out_size: usize) -> ProgrammableLogicArray {
         let mut pla = ProgrammableLogicArray {
+            in_size: in_size,
             or_matrix: Vec::with_capacity(out_size),
         };
         let or_column_size = ProgrammableLogicArray::calculate_or_column_size(in_size);
@@ -120,6 +150,7 @@ impl ProgrammableLogicArray {
 
     pub fn new_mutated(in_size: usize, out_size: usize, num_mutations: u32) -> ProgrammableLogicArray {
         let mut pla = ProgrammableLogicArray {
+            in_size: in_size,
             or_matrix: Vec::with_capacity(out_size),
         };
         let or_column_size = ProgrammableLogicArray::calculate_or_column_size(in_size);
@@ -131,6 +162,15 @@ impl ProgrammableLogicArray {
         }
         pla
     }
+
+    pub fn print2(&self) {
+        let max_bitvector_print = 32;
+        for i in 0..self.or_matrix.len() {
+            print!("or matrix column {}:", i);
+            print_limited_bitvector(&self.or_matrix[i], max_bitvector_print);
+        }
+    }
+
 }
 
 impl Individual for ProgrammableLogicArray {
@@ -141,18 +181,46 @@ impl Individual for ProgrammableLogicArray {
     }
 
     fn print(&self) {
-        let max_bitvector_print = 32;
-        for i in 0..self.or_matrix.len() {
-            print!("or matrix column {}:", i);
-            print_limited_bitvector(&self.or_matrix[i], max_bitvector_print);
+        let out_size = self.or_matrix.len();
+        let or_column_size = ProgrammableLogicArray::calculate_or_column_size(self.in_size);
+        let mut and_matrix_row = get_null_and_row(self.in_size);
+        increment_and_row(&mut and_matrix_row); // skip null vector (all NEITHER)
+
+        let mut output_functions : Vec<String> = Vec::with_capacity(out_size);
+        let mut first_added : Vec<bool> = Vec::with_capacity(out_size);
+        for _i in 0..out_size {
+            output_functions.push(String::new());
+            first_added.push(true);
+        }
+
+        for j in 0..or_column_size {
+            let and_function = and_func_to_str(&and_matrix_row);
+            for i in 0..out_size {
+                if self.or_matrix[i][j] {
+                    if first_added[i] {
+                        first_added[i] = false;
+                    } else {
+                        output_functions[i].push_str(" + ");
+                    }
+                    output_functions[i].push_str(&format!("({})", and_function));
+                }
+            }
+
+            if j < or_column_size - 1 {
+                increment_and_row(&mut and_matrix_row);
+            }
+        }
+
+        for i in 0..out_size {
+            println!("out{} = {}", i, output_functions[i]);
         }
     }
 
     fn calculate_output(&self, input: &Vec<bool>) -> Vec<bool> {
-        let in_size = input.len();
-        let or_column_size = ProgrammableLogicArray::calculate_or_column_size(in_size);
+        assert_eq!(self.in_size, input.len());
+        let or_column_size = ProgrammableLogicArray::calculate_or_column_size(self.in_size);
 
-        let mut and_matrix_row = get_null_and_row(in_size);
+        let mut and_matrix_row = get_null_and_row(self.in_size);
         increment_and_row(&mut and_matrix_row); // skip null vector (all NEITHER)
 
         let out_size = self.or_matrix.len();
