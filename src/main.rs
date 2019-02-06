@@ -1,7 +1,16 @@
 use std::io;
 
-// TODO Do better
-use tetani::*;
+use tetani::digital::{
+    BinOp,
+    ProgrammableLogicArray,
+    binop_2str,
+    calculate_fitness_result,
+    calculate_result,
+    get_null_bitvector,
+    get_rand_bitvector,
+    print_bitvector,
+};
+use tetani::genetic::Individual;
 
 fn main() {
     println!("Let's operate with 2 binary vectors, how many bits?");
