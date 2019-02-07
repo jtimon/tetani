@@ -264,27 +264,28 @@ fn compare_and(bitvector: &Vec<bool>, other: &Vec<bool>) -> bool {
     to_return
 }
 
-pub fn calculate_result(operation_type : &BinOp, v_a: &Vec<bool>, v_b: &Vec<bool>) -> Vec<bool> {
-    assert_eq!(v_a.len(), v_b.len());
-    let mut v_result: Vec<bool> = Vec::new();
-    for i in 0..v_a.len() {
-        v_result.push(
+pub fn calculate_result(operation_type : &BinOp, input: &Vec<bool>) -> Vec<bool> {
+    assert_eq!(input.len() % 2, 0);
+    let half_size = input.len() / 2;
+    let mut result: Vec<bool> = Vec::with_capacity(half_size);
+    for i in 0..half_size {
+        result.push(
             match operation_type {
-                BinOp::AND => v_a[i] && v_b[i],
-                BinOp::OR => v_a[i] || v_b[i],
-                BinOp::XOR => v_a[i] != v_b[i],
-                BinOp::NOR => v_a[i] == v_b[i],
+                BinOp::AND => input[i] && input[i + half_size],
+                BinOp::OR  => input[i] || input[i + half_size],
+                BinOp::XOR => input[i] != input[i + half_size],
+                BinOp::NOR => input[i] == input[i + half_size],
             }
         );
     }
-    v_result
+    result
 }
 
-pub fn calculate_fitness_result(v_result: &Vec<bool>, v_tested: &Vec<bool>) -> i32 {
-    assert_eq!(v_result.len(), v_tested.len());
+pub fn calculate_fitness_result(result: &Vec<bool>, v_tested: &Vec<bool>) -> i32 {
+    assert_eq!(result.len(), v_tested.len());
     let mut fitness = 0;
-    for i in 0..v_result.len() {
-        if v_result[i] == v_tested[i] {
+    for i in 0..result.len() {
+        if result[i] == v_tested[i] {
             fitness += 1;
         }
     }
@@ -352,33 +353,27 @@ pub struct BinaryTask {
     operation_type : BinOp,
     // Temporary fields to remove:
     pub input: Vec<bool>,
-    pub v_result: Vec<bool>,
+    pub result: Vec<bool>,
 }
 
 impl BinaryTask {
     pub fn new(vector_size : usize, operation_type : BinOp) -> BinaryTask {
-        let v_a = get_rand_bitvector(vector_size);
-        let v_b = get_rand_bitvector(vector_size);
-        let mut input = v_a.clone();
-        input.extend(&v_b);
-        let input_len = input.len();
-        assert_eq!(input_len, vector_size * 2);
-
-        let v_result = calculate_result(&operation_type, &v_a, &v_b);
-        assert_eq!(vector_size as i32, calculate_fitness_result(&v_result, &v_result));
+        let input = get_rand_bitvector(vector_size * 2);
+        let result = calculate_result(&operation_type, &input);
+        assert_eq!(vector_size as i32, calculate_fitness_result(&result, &result));
 
         println!("----------------------------------------------------------");
         println!("Your choice was {} bits and operation {}", vector_size, binop_2str(&operation_type));
         println!("----------------------------------------------------------");
         print!("input:  "); print_bitvector(&input);
-        print!("A:      "); print_bitvector(&v_a);
-        print!("B:      "); print_bitvector(&v_b);
-        print!("RESULT: "); print_bitvector(&v_result);
+        print!("A:      "); print_bitvector(&input[0..vector_size]);
+        print!("B:      "); print_bitvector(&input[vector_size..vector_size * 2]);
+        print!("RESULT: "); print_bitvector(&result);
         let bin_task = BinaryTask{
             vector_size,
             operation_type,
             input,
-            v_result,
+            result,
         };
         bin_task
     }
@@ -387,7 +382,7 @@ impl BinaryTask {
 impl Task for BinaryTask {
     fn calculate_fitness(&self, individual: &Individual) -> i32 {
         let ind_result = individual.calculate_output(&self.input);
-        let fitness = calculate_fitness_result(&self.v_result, &ind_result);
+        let fitness = calculate_fitness_result(&self.result, &ind_result);
         println!("INDI fitness: {}", fitness);
         print!("INDI:   "); print_bitvector(&ind_result);
         fitness
