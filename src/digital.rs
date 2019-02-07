@@ -5,6 +5,7 @@ pub use crate::genetic::{
     Task,
 };
 
+#[derive(Clone, PartialEq, Debug)]
 pub enum BinOp {
     AND,
     OR,
@@ -21,7 +22,7 @@ pub fn binop_2str<'a>(input : &BinOp) -> &'a str {
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 enum AndPseudoMatrixValue {
     NEITHER,
     REQUIRED,
@@ -73,6 +74,41 @@ fn and_func_to_str(and_row: &Vec<AndPseudoMatrixValue>) -> String {
             to_return.push_str(&format!("a{}", i));
         } else if and_row[i] == AndPseudoMatrixValue::COMPLEMENT {
             to_return.push_str(&format!("¬a{}", i));
+        }
+    }
+
+    to_return
+}
+
+fn bitvec2minterm_str(and_row: &Vec<bool>) -> String {
+    let mut to_return = String::new();
+
+    for i in 0..and_row.len() {
+        if and_row[i] == true {
+            to_return.push_str(&format!("a{}", i));
+        } else {
+            to_return.push_str(&format!("a{}'", i));
+        }
+    }
+
+    to_return
+}
+
+fn bitvec2maxterm(and_row: &Vec<bool>) -> String {
+    let mut to_return = String::new();
+    let mut first_added = true;
+
+    for i in 0..and_row.len() {
+        if first_added {
+            first_added = false;
+        } else {
+            to_return.push_str(" + ");
+        }
+        // The opposite of minterms by convention
+        if and_row[i] == false {
+            to_return.push_str(&format!("a{}", i));
+        } else {
+            to_return.push_str(&format!("a{}'", i));
         }
     }
 
@@ -264,6 +300,16 @@ fn compare_and(bitvector: &Vec<bool>, other: &Vec<bool>) -> bool {
     to_return
 }
 
+fn eq_bitvector(bitvector: &Vec<bool>, other: &Vec<bool>) -> bool {
+    assert_eq!(bitvector.len(), other.len());
+    for i in 0..bitvector.len() {
+        if bitvector[i] != other[i] {
+            return false
+        }
+    }
+    true
+}
+
 pub fn calculate_result(operation_type : &BinOp, input: &Vec<bool>) -> Vec<bool> {
     assert_eq!(input.len() % 2, 0);
     let half_size = input.len() / 2;
@@ -348,6 +394,7 @@ fn print_limited_bitvector(v: &[bool], max: usize) {
     println!("");
 }
 
+// #[derive(Debug)]
 pub struct BinaryTask {
     vector_size : usize,
     operation_type : BinOp,
@@ -379,6 +426,17 @@ impl BinaryTask {
     }
 }
 
+impl Clone for BinaryTask {
+    fn clone(&self) -> BinaryTask {
+        BinaryTask {
+            vector_size : self.vector_size,
+            operation_type : self.operation_type.clone(),
+            input: self.input.clone(),
+            result: self.result.clone(),
+        }
+    }
+}
+
 impl Task for BinaryTask {
     fn calculate_fitness(&self, individual: &Individual) -> i32 {
         let ind_result = individual.calculate_output(&self.input);
@@ -386,5 +444,165 @@ impl Task for BinaryTask {
         println!("INDI fitness: {}", fitness);
         print!("INDI:   "); print_bitvector(&ind_result);
         fitness
+    }
+}
+
+/// https://en.wikipedia.org/wiki/Truth_table
+/// https://en.wikipedia.org/wiki/Canonical_normal_form
+///
+/// # Examples
+///
+/// ```
+/// let tt_empt = TruthTable::new_empt(1);
+/// let tt_null = TruthTable::new_null(1, 1);
+/// let tt_rand = TruthTable::new_rand(1, 1);
+/// let tt_muta = TruthTable::new_muta(1, 1);
+/// ```
+#[derive(Debug)]
+pub struct TruthTable {
+    /// The inputs part of the table is reproduced programatically when needed by simply iterating the input bitvector.
+    /// outputs: [[bool; 2^in_size]; out_size]
+    outputs: Vec< Vec<bool> >,
+    /// We know in_size is the root square of any of the bitvetors inside outputs,
+    /// but it is redundantly stored here for convinience.
+    in_size: usize,
+}
+
+impl Clone for TruthTable {
+    fn clone(&self) -> TruthTable {
+        TruthTable {
+            outputs: self.outputs.clone(),
+            in_size: self.in_size,
+        }
+    }
+}
+
+impl TruthTable {
+
+    pub fn new_empt(in_size: usize) -> TruthTable {
+        TruthTable {
+            in_size: in_size,
+            outputs: vec![],
+        }
+    }
+
+    pub fn new_null(in_size: usize, out_size: usize) -> TruthTable {
+        let mut tt = TruthTable {
+            in_size: in_size,
+            outputs: Vec::with_capacity(out_size),
+        };
+        let column_size = tt.get_input_space_cardinality();
+        for _i in 0..out_size {
+            tt.outputs.push(get_null_bitvector(column_size));
+        }
+        tt
+    }
+
+    pub fn new_rand(in_size: usize, out_size: usize) -> TruthTable {
+        let mut tt = TruthTable {
+            in_size: in_size,
+            outputs: Vec::with_capacity(out_size),
+        };
+        let column_size = tt.get_input_space_cardinality();
+        for _i in 0..out_size {
+            tt.outputs.push(get_rand_bitvector(column_size));
+        }
+        tt
+    }
+
+    pub fn new_muta(in_size: usize, out_size: usize, num_mutations: u32) -> TruthTable {
+        let mut tt = TruthTable {
+            in_size: in_size,
+            outputs: Vec::with_capacity(out_size),
+        };
+        let column_size = tt.get_input_space_cardinality();
+        for _i in 0..out_size {
+            tt.outputs.push(get_null_bitvector(column_size));
+        }
+        for _i in 0..num_mutations {
+            tt.random_mutation();
+        }
+        tt
+    }
+
+    fn get_input_space_cardinality(&self) -> usize {
+        2usize.pow(self.in_size as u32)
+    }
+
+    pub fn get_output_size(&self) -> usize {
+        self.outputs.len()
+    }
+
+    pub fn get_input_size(&self) -> usize {
+        self.in_size
+    }
+}
+
+impl Individual for TruthTable {
+    fn random_mutation(&mut self) {
+        let chosen_output = rand::thread_rng().gen_range(0, self.outputs.len());
+        let chosen_input_combination = rand::thread_rng().gen_range(0, self.outputs[0].len());
+        self.outputs[chosen_output][chosen_input_combination] = !self.outputs[chosen_output][chosen_input_combination];
+    }
+
+    fn print(&self) {
+        let out_size = self.outputs.len();
+        let column_size = self.get_input_space_cardinality();
+        let mut minterm = get_null_bitvector(self.in_size);
+
+        let mut output_functions : Vec<String> = Vec::with_capacity(out_size);
+        let mut first_added : Vec<bool> = Vec::with_capacity(out_size);
+        for _i in 0..out_size {
+            output_functions.push(String::new());
+            first_added.push(true);
+        }
+
+        for j in 0..column_size {
+            let minterm_str = bitvec2minterm_str(&minterm);
+            for i in 0..out_size {
+                if self.outputs[i][j] {
+                    if first_added[i] {
+                        first_added[i] = false;
+                    } else {
+                        output_functions[i].push_str(" + ");
+                    }
+                    output_functions[i].push_str(&format!("{}", minterm_str));
+                }
+            }
+
+            if j < column_size - 1 {
+                increment_bitvector(&mut minterm);
+            }
+        }
+
+        for i in 0..out_size {
+            println!("out{} = {}", i, output_functions[i]);
+        }
+    }
+
+    fn calculate_output(&self, input: &Vec<bool>) -> Vec<bool> {
+        assert_eq!(self.in_size, input.len());
+        let out_size = self.outputs.len();
+        let mut output : Vec<bool> = Vec::with_capacity(out_size);
+        for _i in 0..out_size {
+            output.push(false);
+        }
+
+        let column_size = self.get_input_space_cardinality();
+        let mut minterm = get_null_bitvector(self.in_size);
+        for j in 0..column_size {
+
+            for i in 0..out_size {
+                if !output[i] && self.outputs[i][j] && eq_bitvector(&minterm, &input) {
+                    output[i] = true;
+                }
+            }
+
+            if j < column_size - 1 {
+                increment_bitvector(&mut minterm);
+            }
+        }
+
+        output
     }
 }
