@@ -28,12 +28,13 @@ impl<I> RatedIndividual<I>
 
 /// Some data struct ordered by fitness (repeated values are allowed) should replace Vec
 pub struct Population<I: Individual, T: Task> {
-    task: T,
+    pub task: T,
     /// TODO This list should be ordered by fitness
     pop: Vec< RatedIndividual<I> >,
     /// Same initial capacity as pop for now
     unrated_pop: Vec<I>,
-    // index_best: usize,
+    best_index: usize,
+    best_fitness: i32,
 }
 
 impl<I, T> Population<I, T>
@@ -46,10 +47,32 @@ impl<I, T> Population<I, T>
             task,
             pop,
             unrated_pop,
+            best_fitness: -1000,
+            best_index: 0,
         }
     }
 
+    fn update_best(&mut self, new_fitness: i32) {
+        if new_fitness > self.best_fitness {
+            self.best_fitness = new_fitness;
+            self.best_index = self.pop.len();
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.pop.len()
+    }
+
+    pub fn best_fitness(&self) -> i32 {
+        self.best_fitness
+    }
+
+    pub fn best(&self) -> &I {
+        &self.pop[self.best_index].indi
+    }
+
     pub fn add_rated_individual(&mut self, indi: RatedIndividual<I>) {
+        self.update_best(indi.fitness);
         self.pop.push(indi);
     }
 
@@ -63,13 +86,21 @@ impl<I, T> Population<I, T>
     }
 
     pub fn rate_unrated_individuals(&mut self) {
+        let mut new_best = self.best_fitness();
+        let mut new_best_index = self.best_index;
         for indi in self.unrated_pop.iter() {
             let fitness = self.task.calculate_fitness(indi);
+            if fitness > new_best {
+                new_best = fitness;
+                new_best_index = self.pop.len();
+            }
             self.pop.push(RatedIndividual{
                 indi: indi.clone(),
                 fitness,
             });
         }
+        self.best_fitness = new_best;
+        self.best_index = new_best_index;
         self.unrated_pop.clear();
     }
 

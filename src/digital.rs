@@ -424,8 +424,6 @@ pub struct BinaryTask {
 
 impl BinaryTask {
     pub fn new(vector_size : usize, operation_type : BinOp) -> BinaryTask {
-        println!("----------------------------------------------------------");
-        println!("Your choice was {} bits and operation {}", vector_size, binop_2str(&operation_type));
         BinaryTask{
             vector_size,
             operation_type,
