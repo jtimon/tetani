@@ -43,7 +43,7 @@ fn main() {
     let max_tries = 10;
     for _ in 0..max_tries {
         let mut mutant = individual.clone();
-        mutant.random_mutation();
+        mutant.mutate();
         tt_pop.add_and_rate_individual(mutant);
     }
     tt_pop.add_and_rate_individual(individual);

@@ -207,7 +207,7 @@ impl ProgrammableLogicArray {
             pla.or_matrix.push(get_null_bitvector(or_column_size));
         }
         for _i in 0..num_mutations {
-            pla.random_mutation();
+            pla.mutate();
         }
         pla
     }
@@ -223,7 +223,7 @@ impl ProgrammableLogicArray {
 }
 
 impl Individual for ProgrammableLogicArray {
-    fn random_mutation(&mut self) {
+    fn mutate(&mut self) {
         let chosen_bit = rand::thread_rng().gen_range(0, self.or_matrix.len());
         let chosen_output = rand::thread_rng().gen_range(0, self.or_matrix[0].len());
         self.or_matrix[chosen_bit][chosen_output] = !self.or_matrix[chosen_bit][chosen_output];
@@ -540,7 +540,7 @@ impl TruthTable {
             tt.outputs.push(get_null_bitvector(column_size));
         }
         for _i in 0..num_mutations {
-            tt.random_mutation();
+            tt.mutate();
         }
         tt
     }
@@ -559,7 +559,7 @@ impl TruthTable {
 }
 
 impl Individual for TruthTable {
-    fn random_mutation(&mut self) {
+    fn mutate(&mut self) {
         let chosen_output = rand::thread_rng().gen_range(0, self.outputs.len());
         let chosen_input_combination = rand::thread_rng().gen_range(0, self.outputs[0].len());
         self.outputs[chosen_output][chosen_input_combination] = !self.outputs[chosen_output][chosen_input_combination];

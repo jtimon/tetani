@@ -3,7 +3,7 @@
 /// Individuals compete for fitness within a Population
 pub trait Individual {
     fn calculate_output(&self, input: &Vec<bool>) -> Vec<bool>;
-    fn random_mutation(&mut self);
+    fn mutate(&mut self);
     fn print(&self);
 }
 
