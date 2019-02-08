@@ -1,10 +1,11 @@
 use std::io;
 
 use tetani::digital::{
-    BinaryTask,
     BinOp,
+    BinaryTask,
     ProgrammableLogicArray,
     TruthTable,
+    u32_2binop,
 };
 
 use tetani::genetic::{
@@ -17,7 +18,7 @@ fn main() {
     println!("Let's operate with 2 binary vectors, how many bits?");
     let vector_size : usize = get_input(1, 8) as usize;
     println!("What binary operation? 0: AND, 1: OR, 2: XOR 3: NOR");
-    let operation_type : BinOp = input_2binop(get_input(0, 3));
+    let operation_type : BinOp = u32_2binop(get_input(0, 3));
 
     let bin_task = BinaryTask::new(vector_size, operation_type);
 
@@ -28,9 +29,9 @@ fn main() {
 
     let mut tt_pop : Population<TruthTable, BinaryTask> = Population::new(bin_task.clone(), population_size);
     tt_pop.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 2));
-    tt_pop.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 2));
     tt_pop.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 4));
     tt_pop.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 8));
+    tt_pop.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 16));
 
     let mut pop : Population<ProgrammableLogicArray, BinaryTask> = Population::new(bin_task, population_size);
     pop.add_unrated_individual(ProgrammableLogicArray::new_null(input_len, vector_size));
@@ -40,7 +41,7 @@ fn main() {
     // pop.add_unrated_individual(ProgrammableLogicArray::new_rand(input_len, vector_size));
 
     let mut individual = TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 2);
-    let max_tries = 10;
+    let max_tries = 4;
     for _ in 0..max_tries {
         let mut mutant = individual.clone();
         mutant.mutate();
@@ -56,16 +57,6 @@ fn main() {
     println!("----------------------------------------------------------");
     tt_pop.print();
     pop.print();
-}
-
-pub fn input_2binop(input : u32) -> BinOp {
-    match input {
-        0 => BinOp::AND,
-        1 => BinOp::OR,
-        2 => BinOp::XOR,
-        3 => BinOp::NOR,
-        _ => panic!("crash and burn"),
-    }
 }
 
 fn get_input(input_min: u32, input_max: u32) -> u32 {

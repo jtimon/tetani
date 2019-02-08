@@ -22,7 +22,7 @@ impl<I> RatedIndividual<I>
     where I: Individual {
     pub fn print(&self) {
         println!("Fitness {}, individual:", self.fitness);
-        self.indi.print();
+        // self.indi.print();
     }
 }
 
@@ -33,7 +33,7 @@ pub struct Population<I: Individual, T: Task> {
     pop: Vec< RatedIndividual<I> >,
     /// Same initial capacity as pop for now
     unrated_pop: Vec<I>,
-    index_best: usize,
+    // index_best: usize,
 }
 
 impl<I, T> Population<I, T>

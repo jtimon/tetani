@@ -22,6 +22,16 @@ pub fn binop_2str<'a>(input : &BinOp) -> &'a str {
     }
 }
 
+pub fn u32_2binop(input : u32) -> BinOp {
+    match input {
+        0 => BinOp::AND,
+        1 => BinOp::OR,
+        2 => BinOp::XOR,
+        3 => BinOp::NOR,
+        _ => panic!("crash and burn"),
+    }
+}
+
 #[derive(Clone, PartialEq, Debug)]
 enum AndPseudoMatrixValue {
     NEITHER,
