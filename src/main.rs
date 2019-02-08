@@ -22,29 +22,28 @@ fn main() {
     let bin_task = BinaryTask::new(vector_size, operation_type);
 
     println!("----------------------------------------------------------");
-    println!("Fenotypes:");
     println!("MAX  fitness: {}", vector_size);
     let population_size = 4;
     let input_len = bin_task.input.len();
 
     let mut tt_pop : Population<TruthTable, BinaryTask> = Population::new(bin_task.clone(), population_size);
-    tt_pop.add_and_rate_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 2));
-    tt_pop.add_and_rate_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 2));
-    tt_pop.add_and_rate_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 4));
-    tt_pop.add_and_rate_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 8));
+    tt_pop.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 2));
+    tt_pop.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 2));
+    tt_pop.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 4));
+    tt_pop.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 8));
 
     let mut pop : Population<ProgrammableLogicArray, BinaryTask> = Population::new(bin_task, population_size);
-
-    // pop.add_and_rate_individual(ProgrammableLogicArray::new_null(input_len, vector_size));
+    // pop.add_unrated_individual(ProgrammableLogicArray::new_null(input_len, vector_size));
     pop.add_and_rate_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 2));
-    pop.add_and_rate_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 2));
-    pop.add_and_rate_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 4));
-    pop.add_and_rate_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 8));
-    // pop.add_and_rate_individual(ProgrammableLogicArray::new_rand(input_len, vector_size));
+    pop.add_unrated_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 2));
+    pop.add_unrated_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 4));
+    pop.add_unrated_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 8));
+    // pop.add_unrated_individual(ProgrammableLogicArray::new_rand(input_len, vector_size));
 
+    tt_pop.rate_unrated_individuals();
+    pop.rate_unrated_individuals();
 
     println!("----------------------------------------------------------");
-    println!("Genotypes:");
     tt_pop.print();
     pop.print();
 }

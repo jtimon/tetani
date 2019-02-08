@@ -147,6 +147,7 @@ fn compare_and_row(and_row: &Vec<AndPseudoMatrixValue>, input: &Vec<bool>) -> bo
 /// TODO: use the minimal representation, this one still has redundancies.
 /// For example: out0 = (a0) + (a0 + a1), it's equivalent to just out0 = (a0).
 /// This results in redudant different genotypes that result in equivalent fenotypes.
+#[derive(Debug)]
 pub struct ProgrammableLogicArray {
     /// No need to store the input, pass it as a reference to calculate_output.
     /// The input is expected to be Vec<bool> with the same size as stored or it will panic.
@@ -154,6 +155,15 @@ pub struct ProgrammableLogicArray {
     /// or_matrix: [[bool; 3^in_size-1]; out_size],
     /// imaginary_and_matrix: [[bool; in_size]; 3^in_size-1],
     or_matrix: Vec< Vec<bool> >,
+}
+
+impl Clone for ProgrammableLogicArray {
+    fn clone(&self) -> ProgrammableLogicArray {
+        ProgrammableLogicArray {
+            or_matrix: self.or_matrix.clone(),
+            in_size: self.in_size,
+        }
+    }
 }
 
 impl ProgrammableLogicArray {
@@ -441,8 +451,6 @@ impl Task for BinaryTask {
     fn calculate_fitness(&self, individual: &Individual) -> i32 {
         let ind_result = individual.calculate_output(&self.input);
         let fitness = calculate_fitness_result(&self.result, &ind_result);
-        println!("INDI fitness: {}", fitness);
-        print!("INDI:   "); print_bitvector(&ind_result);
         fitness
     }
 }
