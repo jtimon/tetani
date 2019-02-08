@@ -1,4 +1,3 @@
-use std::io;
 
 use tetani::digital::{
     BinOp,
@@ -8,20 +7,20 @@ use tetani::digital::{
     binop_2str,
     u32_2binop,
 };
-
 use tetani::genetic::{
     Individual,
     Population,
     Task,
 };
+use tetani::ui;
 
 fn main() {
     println!("Let's operate with 2 binary vectors, how many bits?");
-    let vector_size : usize = get_input(1, 8) as usize;
+    let vector_size : usize = ui::input_u32(1, 8) as usize;
     println!("What binary operation? 0: AND, 1: OR, 2: XOR 3: NOR");
-    let operation_type : BinOp = u32_2binop(get_input(0, 3));
+    let operation_type : BinOp = u32_2binop(ui::input_u32(0, 3));
     // println!("How many maximum individuals generated per population?");
-    // let max_generation : usize = get_input(1, 10000) as usize;
+    // let max_generation : usize = ui::input_u32(1, 10000) as usize;
     let max_generation : usize = 5000;
     let population_size = 3000;
 
@@ -76,32 +75,4 @@ fn main() {
     println!("Programable Logic Array total generations: {}", pop_pla.len());
     println!("Best Programable Logic Array:");
     pop_pla.best().print();
-}
-
-fn get_input(input_min: u32, input_max: u32) -> u32 {
-
-    let mut input_value;
-    loop {
-        input_value = String::new();
-        io::stdin()
-            .read_line(&mut input_value)
-            .expect("get_input: Failed to read line");
-
-        let input_value: u32 = match input_value.trim().parse() {
-            Ok(num) => num,
-            Err(_) => {
-                println!("Input has to be u32");
-                continue;
-            },
-        };
-        if input_value < input_min {
-            println!("Min input {}", input_min);
-            continue;
-        }
-        if input_value > input_max {
-            println!("Max input {}", input_max);
-            continue;
-        }
-        return input_value;
-    }
 }
