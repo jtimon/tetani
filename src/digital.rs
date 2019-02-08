@@ -70,20 +70,12 @@ fn increment_and_row(and_row: &mut Vec<AndPseudoMatrixValue>) {
 
 fn and_func_to_str(and_row: &Vec<AndPseudoMatrixValue>) -> String {
     let mut to_return = String::new();
-    let mut first_added = true;
 
     for i in 0..and_row.len() {
-        if and_row[i] != AndPseudoMatrixValue::NEITHER {
-            if first_added {
-                first_added = false;
-            } else {
-                to_return.push_str(" ⋅ ");
-            }
-        }
         if and_row[i] == AndPseudoMatrixValue::REQUIRED {
             to_return.push_str(&format!("a{}", i));
         } else if and_row[i] == AndPseudoMatrixValue::COMPLEMENT {
-            to_return.push_str(&format!("¬a{}", i));
+            to_return.push_str(&format!("a{}'", i));
         }
     }
 
@@ -106,6 +98,7 @@ fn bitvec2minterm_str(and_row: &Vec<bool>) -> String {
 
 fn bitvec2maxterm(and_row: &Vec<bool>) -> String {
     let mut to_return = String::new();
+    to_return.push_str("(");
     let mut first_added = true;
 
     for i in 0..and_row.len() {
@@ -121,6 +114,7 @@ fn bitvec2maxterm(and_row: &Vec<bool>) -> String {
             to_return.push_str(&format!("a{}'", i));
         }
     }
+    to_return.push_str(")");
 
     to_return
 }
@@ -261,7 +255,7 @@ impl Individual for ProgrammableLogicArray {
                     } else {
                         output_functions[i].push_str(" + ");
                     }
-                    output_functions[i].push_str(&format!("({})", and_function));
+                    output_functions[i].push_str(&format!("{}", and_function));
                 }
             }
 
