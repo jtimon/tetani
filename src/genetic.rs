@@ -10,6 +10,7 @@ pub trait Individual {
 /// Individuals are rated fitness for a given task
 pub trait Task {
     fn calculate_fitness(&self, individual: &Individual) -> i32;
+    fn get_max_fitness(&self) -> i32;
 }
 
 pub struct RatedIndividual<I: Individual> {
@@ -32,6 +33,7 @@ pub struct Population<I: Individual, T: Task> {
     pop: Vec< RatedIndividual<I> >,
     /// Same initial capacity as pop for now
     unrated_pop: Vec<I>,
+    index_best: usize,
 }
 
 impl<I, T> Population<I, T>

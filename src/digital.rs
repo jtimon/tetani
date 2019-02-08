@@ -404,35 +404,23 @@ fn print_limited_bitvector(v: &[bool], max: usize) {
     println!("");
 }
 
+/// A task implementing a single binary operation between two bitvectors of equal len.
 // #[derive(Debug)]
 pub struct BinaryTask {
     vector_size : usize,
     operation_type : BinOp,
-    // Temporary fields to remove:
-    pub input: Vec<bool>,
-    pub result: Vec<bool>,
+    max_fitness : i32,
 }
 
 impl BinaryTask {
     pub fn new(vector_size : usize, operation_type : BinOp) -> BinaryTask {
-        let input = get_rand_bitvector(vector_size * 2);
-        let result = calculate_result(&operation_type, &input);
-        assert_eq!(vector_size as i32, calculate_fitness_result(&result, &result));
-
         println!("----------------------------------------------------------");
         println!("Your choice was {} bits and operation {}", vector_size, binop_2str(&operation_type));
-        println!("----------------------------------------------------------");
-        print!("input:  "); print_bitvector(&input);
-        print!("A:      "); print_bitvector(&input[0..vector_size]);
-        print!("B:      "); print_bitvector(&input[vector_size..vector_size * 2]);
-        print!("RESULT: "); print_bitvector(&result);
-        let bin_task = BinaryTask{
+        BinaryTask{
             vector_size,
             operation_type,
-            input,
-            result,
-        };
-        bin_task
+            max_fitness : vector_size as i32 * 2i32.pow(vector_size as u32 * 2),
+        }
     }
 }
 
@@ -441,16 +429,40 @@ impl Clone for BinaryTask {
         BinaryTask {
             vector_size : self.vector_size,
             operation_type : self.operation_type.clone(),
-            input: self.input.clone(),
-            result: self.result.clone(),
+            max_fitness : self.max_fitness,
         }
     }
 }
 
 impl Task for BinaryTask {
+
+    fn get_max_fitness(&self) -> i32 {
+        self.max_fitness
+    }
+
     fn calculate_fitness(&self, individual: &Individual) -> i32 {
-        let ind_result = individual.calculate_output(&self.input);
-        let fitness = calculate_fitness_result(&self.result, &ind_result);
+        let mut fitness = 0;
+        let in_size = self.vector_size * 2;
+        let mut input = get_null_bitvector(in_size);
+        let input_space_cardinality = 2usize.pow(in_size as u32);
+
+        for j in 0..input_space_cardinality {
+            let result = calculate_result(&self.operation_type, &input);
+            let ind_result = individual.calculate_output(&input);
+            fitness += calculate_fitness_result(&result, &ind_result);
+            // println!("----------------------------------------------------------");
+            // assert_eq!(self.vector_size as i32, calculate_fitness_result(&result, &result));
+            // print!("input:  "); print_bitvector(&input);
+            // print!("A:      "); print_bitvector(&input[0..self.vector_size]);
+            // print!("B:      "); print_bitvector(&input[self.vector_size..self.vector_size * 2]);
+            // print!("RESULT: "); print_bitvector(&result);
+            // print!("INDI:   "); print_bitvector(&ind_result);
+            // print!("FITNESS: {}", fitness);
+
+            if j < input_space_cardinality - 1 {
+                increment_bitvector(&mut input);
+            }
+        }
         fitness
     }
 }

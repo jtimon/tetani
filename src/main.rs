@@ -22,9 +22,9 @@ fn main() {
     let bin_task = BinaryTask::new(vector_size, operation_type);
 
     println!("----------------------------------------------------------");
-    println!("MAX  fitness: {}", vector_size);
+    println!("MAX  fitness: {}", bin_task.get_max_fitness());
     let population_size = 4;
-    let input_len = bin_task.input.len();
+    let input_len = vector_size * 2;
 
     let mut tt_pop : Population<TruthTable, BinaryTask> = Population::new(bin_task.clone(), population_size);
     tt_pop.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 2));
@@ -33,15 +33,25 @@ fn main() {
     tt_pop.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 8));
 
     let mut pop : Population<ProgrammableLogicArray, BinaryTask> = Population::new(bin_task, population_size);
-    // pop.add_unrated_individual(ProgrammableLogicArray::new_null(input_len, vector_size));
-    pop.add_and_rate_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 2));
+    pop.add_unrated_individual(ProgrammableLogicArray::new_null(input_len, vector_size));
     pop.add_unrated_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 2));
     pop.add_unrated_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 4));
     pop.add_unrated_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 8));
     // pop.add_unrated_individual(ProgrammableLogicArray::new_rand(input_len, vector_size));
 
+    let mut individual = TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 2);
+    let max_tries = 10;
+    for _ in 0..max_tries {
+        let mut mutant = individual.clone();
+        mutant.random_mutation();
+        tt_pop.add_and_rate_individual(mutant);
+    }
+    tt_pop.add_and_rate_individual(individual);
+
     tt_pop.rate_unrated_individuals();
     pop.rate_unrated_individuals();
+
+    pop.add_and_rate_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 2));
 
     println!("----------------------------------------------------------");
     tt_pop.print();
