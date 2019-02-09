@@ -43,9 +43,7 @@ fn main() {
     println!("----------------------------------------------------------");
     println!("Truth Table population:");
 
-    while pop_tt.task.get_max_fitness() > pop_tt.best_fitness() && pop_tt.len() < max_generation {
-        pop_tt.next_generation();
-    }
+    pop_tt.learn_task(max_generation);
     // pop_tt.print();
     println!("Truth Table total generations: {}", pop_tt.len());
     println!("Best Truth Table:");
@@ -64,9 +62,7 @@ fn main() {
     println!("----------------------------------------------------------");
     println!("Programable Logic Array population:");
 
-    while pop_pla.task.get_max_fitness() > pop_pla.best_fitness() && pop_pla.len() < max_generation {
-        pop_pla.next_generation();
-    }
+    pop_pla.learn_task(max_generation);
     // pop_pla.print();
     println!("Programable Logic Array total generations: {}", pop_pla.len());
     println!("Best Programable Logic Array:");

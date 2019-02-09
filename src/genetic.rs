@@ -91,6 +91,12 @@ impl<I, T> Population<I, T>
         self.add_and_rate_individual(mutant);
     }
 
+    pub fn learn_task(&mut self, max_generation: usize) {
+        while self.task.get_max_fitness() > self.best_fitness() && self.pop.len() < max_generation {
+            self.next_generation();
+        }
+    }
+
     pub fn rate_unrated_individuals(&mut self) {
         let mut new_best = self.best_fitness();
         let mut new_best_index = self.best_index;
