@@ -85,6 +85,12 @@ impl<I, T> Population<I, T>
         self.add_rated_individual(RatedIndividual{indi, fitness});
     }
 
+    pub fn next_generation(&mut self) {
+        let mut mutant = self.best().clone();
+        mutant.mutate();
+        self.add_and_rate_individual(mutant);
+    }
+
     pub fn rate_unrated_individuals(&mut self) {
         let mut new_best = self.best_fitness();
         let mut new_best_index = self.best_index;

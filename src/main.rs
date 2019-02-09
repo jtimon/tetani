@@ -44,9 +44,7 @@ fn main() {
     println!("Truth Table population:");
 
     while pop_tt.task.get_max_fitness() > pop_tt.best_fitness() && pop_tt.len() < max_generation {
-        let mut mutant = pop_tt.best().clone();
-        mutant.mutate();
-        pop_tt.add_and_rate_individual(mutant);
+        pop_tt.next_generation();
     }
     // pop_tt.print();
     println!("Truth Table total generations: {}", pop_tt.len());
@@ -67,9 +65,7 @@ fn main() {
     println!("Programable Logic Array population:");
 
     while pop_pla.task.get_max_fitness() > pop_pla.best_fitness() && pop_pla.len() < max_generation {
-        let mut mutant = pop_pla.best().clone();
-        mutant.mutate();
-        pop_pla.add_and_rate_individual(mutant);
+        pop_pla.next_generation();
     }
     // pop_pla.print();
     println!("Programable Logic Array total generations: {}", pop_pla.len());
