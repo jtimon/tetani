@@ -5,12 +5,14 @@ pub trait Individual {
     fn calculate_output(&self, input: &Vec<bool>) -> Vec<bool>;
     fn mutate(&mut self);
     fn print(&self);
+    fn input_size(&self) -> usize;
+    fn output_size(&self) -> usize;
 }
 
 /// Individuals are rated fitness for a given task
 pub trait Task {
     fn calculate_fitness(&self, individual: &Individual) -> i32;
-    fn get_max_fitness(&self) -> i32;
+    fn max_fitness(&self) -> i32;
 }
 
 struct RatedIndividual<I: Individual> {
@@ -92,7 +94,7 @@ impl<I, T> Population<I, T>
     }
 
     pub fn learn_task(&mut self, max_generation: usize) {
-        while self.task.get_max_fitness() > self.best_fitness() && self.pop.len() < max_generation {
+        while self.best_fitness() < self.task.max_fitness() && self.pop.len() < max_generation {
             self.next_generation();
         }
     }

@@ -306,6 +306,14 @@ impl Individual for ProgrammableLogicArray {
 
         output
     }
+
+    fn output_size(&self) -> usize {
+        self.or_matrix.len()
+    }
+
+    fn input_size(&self) -> usize {
+        self.in_size
+    }
 }
 
 // returns true if all active bits in bitvector are also active in other or false otherwise
@@ -449,7 +457,7 @@ impl Clone for BinaryTask {
 
 impl Task for BinaryTask {
 
-    fn get_max_fitness(&self) -> i32 {
+    fn max_fitness(&self) -> i32 {
         self.max_fitness
     }
 
@@ -561,14 +569,6 @@ impl TruthTable {
     fn get_input_space_cardinality(&self) -> usize {
         2usize.pow(self.in_size as u32)
     }
-
-    pub fn get_output_size(&self) -> usize {
-        self.outputs.len()
-    }
-
-    pub fn get_input_size(&self) -> usize {
-        self.in_size
-    }
 }
 
 impl Individual for TruthTable {
@@ -637,5 +637,13 @@ impl Individual for TruthTable {
         }
 
         output
+    }
+
+    fn output_size(&self) -> usize {
+        self.outputs.len()
+    }
+
+    fn input_size(&self) -> usize {
+        self.in_size
     }
 }

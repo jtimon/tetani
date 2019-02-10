@@ -27,7 +27,7 @@ fn main() {
     println!("----------------------------------------------------------");
     let bin_task = BinaryTask::new(vector_size, operation_type.clone());
     println!("Your choice was {} bits and operation {}. Max generation: {}", vector_size, binop_2str(&operation_type), max_generation);
-    println!("MAX  fitness: {}", bin_task.get_max_fitness());
+    println!("MAX  fitness: {}", bin_task.max_fitness());
     let input_len = vector_size * 2;
 
     println!("----------------------------------------------------------");
