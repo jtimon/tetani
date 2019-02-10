@@ -7,12 +7,15 @@ pub use crate::genetic::{
     Task,
 };
 
+/// Basic logic gates. Operations that can be done between two bits.
 #[derive(Clone, PartialEq, Debug)]
 pub enum BinOp {
     AND,
     OR,
     XOR,
+    NAND,
     NOR,
+    XNOR,
 }
 
 pub fn binop_2str<'a>(input : &BinOp) -> &'a str {
@@ -20,7 +23,9 @@ pub fn binop_2str<'a>(input : &BinOp) -> &'a str {
         BinOp::AND => "AND",
         BinOp::OR => "OR",
         BinOp::XOR => "XOR",
+        BinOp::NAND => "NAND",
         BinOp::NOR => "NOR",
+        BinOp::XNOR => "XNOR",
     }
 }
 
@@ -29,7 +34,9 @@ pub fn u32_2binop(input : u32) -> BinOp {
         0 => BinOp::AND,
         1 => BinOp::OR,
         2 => BinOp::XOR,
-        3 => BinOp::NOR,
+        3 => BinOp::NAND,
+        4 => BinOp::NOR,
+        5 => BinOp::XNOR,
         _ => panic!("crash and burn"),
     }
 }
@@ -333,17 +340,19 @@ pub fn calculate_result(operation_type : &BinOp, input: &Vec<bool>) -> Vec<bool>
     for i in 0..half_size {
         result.push(
             match operation_type {
-                BinOp::AND => input[i] && input[i + half_size],
-                BinOp::OR  => input[i] || input[i + half_size],
-                BinOp::XOR => input[i] != input[i + half_size],
-                BinOp::NOR => input[i] == input[i + half_size],
+                BinOp::AND =>    input[i] && input[i + half_size],
+                BinOp::OR  =>    input[i] || input[i + half_size],
+                BinOp::XOR =>    input[i] != input[i + half_size],
+                BinOp::NOR  => !(input[i] || input[i + half_size]),
+                BinOp::NAND => !(input[i] && input[i + half_size]),
+                BinOp::XNOR =>   input[i] == input[i + half_size],
             }
         );
     }
     result
 }
 
-pub fn calculate_fitness_result(result: &Vec<bool>, v_tested: &Vec<bool>) -> i32 {
+fn calculate_fitness_result(result: &Vec<bool>, v_tested: &Vec<bool>) -> i32 {
     assert_eq!(result.len(), v_tested.len());
     let mut fitness = 0;
     for i in 0..result.len() {

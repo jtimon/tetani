@@ -17,8 +17,8 @@ use tetani::ui;
 fn main() {
     println!("Let's operate with 2 binary vectors, how many bits?");
     let vector_size : usize = ui::input_u32(1, 8) as usize;
-    println!("What binary operation? 0: AND, 1: OR, 2: XOR 3: NOR");
-    let operation_type : BinOp = u32_2binop(ui::input_u32(0, 3));
+    println!("What binary operation (logic gate)? 0: AND, 1: OR, 2: XOR, 3: NAND, 4: NOR, 5: NXOR");
+    let operation_type : BinOp = u32_2binop(ui::input_u32(0, 5));
     // println!("How many maximum individuals generated per population?");
     // let max_generation : usize = ui::input_u32(1, 10000) as usize;
     let max_generation : usize = 5000;
