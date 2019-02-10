@@ -1,4 +1,4 @@
-//! The genetic module is mostly to praise Darwin and Wallace.
+//! The genetic module is mostly to praise Darwin and Wallace. It implements Genetic Algorithms.
 
 /// Individuals compete for fitness within a Population
 pub trait Individual {
@@ -13,7 +13,7 @@ pub trait Task {
     fn get_max_fitness(&self) -> i32;
 }
 
-pub struct RatedIndividual<I: Individual> {
+struct RatedIndividual<I: Individual> {
     indi: I,
     fitness: i32,
 }
@@ -71,7 +71,7 @@ impl<I, T> Population<I, T>
         &self.pop[self.best_index].indi
     }
 
-    pub fn add_rated_individual(&mut self, indi: RatedIndividual<I>) {
+    fn add_rated_individual(&mut self, indi: RatedIndividual<I>) {
         self.update_best(indi.fitness);
         self.pop.push(indi);
     }

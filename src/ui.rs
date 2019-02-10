@@ -1,6 +1,8 @@
+//! The ui module contains convience for user interface.
 
 use std::io;
 
+/// Asks the user for a u32 between input_min and input_max and returns it.
 pub fn input_u32(input_min: u32, input_max: u32) -> u32 {
 
     let mut input_value;

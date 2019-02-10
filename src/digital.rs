@@ -1,3 +1,5 @@
+//! The digital module is about boolean functions and digital systems.
+
 use rand::Rng;
 
 pub use crate::genetic::{
