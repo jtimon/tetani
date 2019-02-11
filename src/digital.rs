@@ -19,6 +19,18 @@ pub enum BinOp {
 }
 
 impl BinOp {
+    pub fn from_u32(input : u32) -> BinOp {
+        match input {
+            0 => BinOp::AND,
+            1 => BinOp::OR,
+            2 => BinOp::XOR,
+            3 => BinOp::NAND,
+            4 => BinOp::NOR,
+            5 => BinOp::XNOR,
+            _ => unreachable!(),
+        }
+    }
+
     pub fn to_str<'a>(&self) -> &'a str {
         match self {
             BinOp::AND => "AND",
@@ -28,18 +40,6 @@ impl BinOp {
             BinOp::NOR => "NOR",
             BinOp::XNOR => "XNOR",
         }
-    }
-}
-
-pub fn u32_2binop(input : u32) -> BinOp {
-    match input {
-        0 => BinOp::AND,
-        1 => BinOp::OR,
-        2 => BinOp::XOR,
-        3 => BinOp::NAND,
-        4 => BinOp::NOR,
-        5 => BinOp::XNOR,
-        _ => unreachable!(),
     }
 }
 
