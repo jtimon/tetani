@@ -37,7 +37,7 @@ pub fn u32_2binop(input : u32) -> BinOp {
         3 => BinOp::NAND,
         4 => BinOp::NOR,
         5 => BinOp::XNOR,
-        _ => panic!("crash and burn"),
+        _ => unreachable!(),
     }
 }
 
