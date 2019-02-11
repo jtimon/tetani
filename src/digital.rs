@@ -50,12 +50,14 @@ enum AndPseudoMatrixValue {
     COMPLEMENT,
 }
 
-fn get_null_and_row(vector_size: usize) -> Vec<AndPseudoMatrixValue> {
-    let mut v: Vec<AndPseudoMatrixValue> = Vec::with_capacity(vector_size);
-    for _i in 0..vector_size {
-        v.push(AndPseudoMatrixValue::NEITHER);
+impl AndPseudoMatrixValue {
+    fn new_null(vector_size: usize) -> Vec<AndPseudoMatrixValue> {
+        let mut v: Vec<AndPseudoMatrixValue> = Vec::with_capacity(vector_size);
+        for _i in 0..vector_size {
+            v.push(AndPseudoMatrixValue::NEITHER);
+        }
+        v
     }
-    v
 }
 
 fn increment_and_row(and_row: &mut Vec<AndPseudoMatrixValue>) {
@@ -247,7 +249,7 @@ impl Individual for ProgrammableLogicArray {
     fn print(&self) {
         let out_size = self.or_matrix.len();
         let or_column_size = ProgrammableLogicArray::calculate_or_column_size(self.in_size);
-        let mut and_matrix_row = get_null_and_row(self.in_size);
+        let mut and_matrix_row = AndPseudoMatrixValue::new_null(self.in_size);
         increment_and_row(&mut and_matrix_row); // skip null vector (all NEITHER)
 
         let mut output_functions : Vec<String> = Vec::with_capacity(out_size);
@@ -284,7 +286,7 @@ impl Individual for ProgrammableLogicArray {
         assert_eq!(self.in_size, input.len());
         let or_column_size = ProgrammableLogicArray::calculate_or_column_size(self.in_size);
 
-        let mut and_matrix_row = get_null_and_row(self.in_size);
+        let mut and_matrix_row = AndPseudoMatrixValue::new_null(self.in_size);
         increment_and_row(&mut and_matrix_row); // skip null vector (all NEITHER)
 
         let out_size = self.or_matrix.len();
