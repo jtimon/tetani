@@ -427,64 +427,135 @@ fn print_limited_bitvector(v: &[bool], max: usize) {
     println!("");
 }
 
-/// A task implementing a single binary operation between two bitvectors of equal len.
-// #[derive(Debug)]
-pub struct BinaryTask {
-    vector_size : usize,
+/// An individual implementing a single binary operation between two bitvectors of equal len.
+/// Thus its output must be half its input.
+#[derive(Debug)]
+pub struct BinaryIndividual {
     operation_type : BinOp,
-    max_fitness : i32,
+    out_size : usize,
+    in_cardinality : usize,
 }
 
-impl BinaryTask {
-    pub fn new(vector_size : usize, operation_type : BinOp) -> BinaryTask {
-        BinaryTask{
-            vector_size,
+impl BinaryIndividual {
+    pub fn new(operation_type : BinOp, in_size : usize) -> BinaryIndividual {
+        assert_eq!(0, in_size % 2);
+        BinaryIndividual {
             operation_type,
-            max_fitness : vector_size as i32 * 2i32.pow(vector_size as u32 * 2),
+            out_size : in_size / 2,
+            in_cardinality : 2usize.pow(in_size as u32),
         }
+    }
+
+    /// input cardinality
+    fn in_cardinality(&self) -> usize {
+        self.in_cardinality
     }
 }
 
-impl Clone for BinaryTask {
-    fn clone(&self) -> BinaryTask {
-        BinaryTask {
-            vector_size : self.vector_size,
+impl Clone for BinaryIndividual {
+    fn clone(&self) -> BinaryIndividual {
+        BinaryIndividual {
             operation_type : self.operation_type.clone(),
-            max_fitness : self.max_fitness,
+            out_size : self.out_size,
+            in_cardinality : self.in_cardinality,
         }
     }
 }
 
-impl Task for BinaryTask {
+/// Should be equivalent to BinaryTask combined with ImitationTask
+impl Individual for BinaryIndividual {
 
-    fn max_fitness(&self) -> i32 {
-        self.max_fitness
+    /// unimplemented! This individual is not supposed to evolve, but only to be imitated others using ImitationTask.
+    fn mutate(&mut self) {
+        unimplemented!();
     }
 
-    fn calculate_fitness(&self, individual: &Individual) -> i32 {
+    fn calculate_output(&self, input: &Vec<bool>) -> Vec<bool> {
+        assert_eq!(input.len(), self.input_size());
+        calculate_result(&self.operation_type, &input)
+    }
+
+    fn print(&self) {
+        println!("BinaryIndividual: operation_type: {}, in_size: {}, out_size: {}, in_cardinality: {}",
+                 binop_2str(&self.operation_type),
+                 self.input_size(),
+                 self.output_size(),
+                 self.in_cardinality(),
+        );
+    }
+
+    fn output_size(&self) -> usize {
+        self.out_size
+    }
+
+    /// input size is twice as much as the output
+    fn input_size(&self) -> usize {
+        self.out_size * 2
+    }
+}
+
+/// Task to imitate another individual, even if it's a different species/type than the population that evolves to imitate it
+/// The inidividual must be stateless, that is, not having an internal state that can affect calculate_output.
+/// Note that in neural networks having recursion implies having an internal state.
+#[derive(Debug)]
+pub struct ImitationTask<I: Individual> {
+    indi: I,
+}
+
+impl<I> ImitationTask<I>
+    where I: Individual + 'static + Clone {
+
+    pub fn new(indi: I) -> ImitationTask<I> {
+        ImitationTask {
+            indi,
+        }
+    }
+}
+
+impl<I> Clone for ImitationTask<I>
+    where I: Individual + 'static + Clone {
+
+    fn clone(&self) -> ImitationTask<I> {
+        ImitationTask {
+            indi: self.indi.clone(),
+        }
+    }
+}
+
+impl<I> Task for ImitationTask<I>
+    where I: Individual + 'static + Clone {
+
+    fn calculate_fitness(&self, other: &Individual) -> i32 {
+        assert_eq!(self.indi.output_size(), other.output_size());
+        let in_size = self.indi.input_size();
+        assert_eq!(in_size, other.input_size());
+
         let mut fitness = 0;
-        let in_size = self.vector_size * 2;
         let mut input = get_null_bitvector(in_size);
         let input_space_cardinality = 2usize.pow(in_size as u32);
 
         for j in 0..input_space_cardinality {
-            let result = calculate_result(&self.operation_type, &input);
-            let ind_result = individual.calculate_output(&input);
-            fitness += calculate_fitness_result(&result, &ind_result);
+            let output_self = self.indi.calculate_output(&input);
+            let output_other = other.calculate_output(&input);
+            fitness += calculate_fitness_result(&output_self, &output_other);
             // println!("----------------------------------------------------------");
-            // assert_eq!(self.vector_size as i32, calculate_fitness_result(&result, &result));
             // print!("input:  "); print_bitvector(&input);
-            // print!("A:      "); print_bitvector(&input[0..self.vector_size]);
-            // print!("B:      "); print_bitvector(&input[self.vector_size..self.vector_size * 2]);
-            // print!("RESULT: "); print_bitvector(&result);
-            // print!("INDI:   "); print_bitvector(&ind_result);
+            // print!("A:      "); print_bitvector(&input[0..self.indi.input_size() / 2]);
+            // print!("B:      "); print_bitvector(&input[self.indi.input_size() / 2..self.indi.input_size()]);
+            // print!("INDI:   "); print_bitvector(&output_self);
+            // print!("OTHER:   "); print_bitvector(&output_other);
             // print!("FITNESS: {}", fitness);
 
             if j < input_space_cardinality - 1 {
                 increment_bitvector(&mut input);
             }
         }
+
         fitness
+    }
+
+    fn max_fitness(&self) -> i32 {
+        self.indi.output_size() as i32 * 2i32.pow(self.indi.input_size() as u32)
     }
 }
 

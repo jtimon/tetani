@@ -1,7 +1,8 @@
 
 use tetani::digital::{
     BinOp,
-    BinaryTask,
+    BinaryIndividual,
+    ImitationTask,
     ProgrammableLogicArray,
     TruthTable,
     binop_2str,
@@ -25,13 +26,15 @@ fn main() {
     let population_size = 3000;
 
     println!("----------------------------------------------------------");
-    let bin_task = BinaryTask::new(vector_size, operation_type.clone());
+    let bi = BinaryIndividual::new(operation_type.clone(), vector_size * 2);
+    let bin_task = ImitationTask::new(bi);
     println!("Your choice was {} bits and operation {}. Max generation: {}", vector_size, binop_2str(&operation_type), max_generation);
     println!("MAX  fitness: {}", bin_task.max_fitness());
     let input_len = vector_size * 2;
 
     println!("----------------------------------------------------------");
-    let mut pop_tt : Population<TruthTable, BinaryTask> = Population::new(bin_task.clone(), population_size);
+    let mut pop_tt : Population<TruthTable, ImitationTask<BinaryIndividual>> = Population::new(bin_task.clone(), population_size);
+
     pop_tt.add_unrated_individual(TruthTable::new_null(input_len, vector_size));
     // pop_tt.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 2));
     // pop_tt.add_unrated_individual(TruthTable::new_muta(input_len, vector_size, vector_size as u32 * 4));
@@ -50,7 +53,8 @@ fn main() {
     pop_tt.best().print();
 
     println!("----------------------------------------------------------");
-    let mut pop_pla : Population<ProgrammableLogicArray, BinaryTask> = Population::new(bin_task, population_size);
+    let mut pop_pla : Population<ProgrammableLogicArray, ImitationTask<BinaryIndividual>> = Population::new(bin_task, population_size);
+
     pop_pla.add_unrated_individual(ProgrammableLogicArray::new_null(input_len, vector_size));
     // pop_pla.add_unrated_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 2));
     // pop_pla.add_unrated_individual(ProgrammableLogicArray::new_mutated(input_len, vector_size, vector_size as u32 * 4));
