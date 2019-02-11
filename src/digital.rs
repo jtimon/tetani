@@ -429,6 +429,16 @@ fn print_limited_bitvector(v: &[bool], max: usize) {
 
 /// An individual implementing a single binary operation between two bitvectors of equal len.
 /// Thus its output must be half its input.
+///
+/// # Examples
+///
+/// ```
+/// use tetani::digital::BinOp;
+/// use tetani::digital::BinaryIndividual;
+/// let bi_and = BinaryIndividual::new(BinOp::AND, 2);
+/// let bi_or = BinaryIndividual::new(BinOp::OR, 2);
+/// let bi_xor = BinaryIndividual::new(BinOp::XOR, 2);
+/// ```
 #[derive(Debug)]
 pub struct BinaryIndividual {
     operation_type : BinOp,
@@ -462,7 +472,6 @@ impl Clone for BinaryIndividual {
     }
 }
 
-/// Should be equivalent to BinaryTask combined with ImitationTask
 impl Individual for BinaryIndividual {
 
     /// unimplemented! This individual is not supposed to evolve, but only to be imitated others using ImitationTask.
@@ -497,6 +506,18 @@ impl Individual for BinaryIndividual {
 /// Task to imitate another individual, even if it's a different species/type than the population that evolves to imitate it
 /// The inidividual must be stateless, that is, not having an internal state that can affect calculate_output.
 /// Note that in neural networks having recursion implies having an internal state.
+///
+/// # Examples
+///
+/// ```
+/// use tetani::digital::BinOp;
+/// use tetani::digital::BinaryIndividual;
+/// use tetani::digital::ImitationTask;
+/// let bi_and_2 = BinaryIndividual::new(BinOp::AND, 2);
+/// let bi_xor_2 = BinaryIndividual::new(BinOp::XOR, 2);
+/// let imitate_bi_and_2 = ImitationTask::new(bi_and_2);
+/// let imitate_bi_xor_2 = ImitationTask::new(bi_xor_2);
+/// ```
 #[derive(Debug)]
 pub struct ImitationTask<I: Individual> {
     indi: I,
@@ -565,10 +586,11 @@ impl<I> Task for ImitationTask<I>
 /// # Examples
 ///
 /// ```
+/// use tetani::digital::TruthTable;
 /// let tt_empt = TruthTable::new_empt(1);
 /// let tt_null = TruthTable::new_null(1, 1);
 /// let tt_rand = TruthTable::new_rand(1, 1);
-/// let tt_muta = TruthTable::new_muta(1, 1);
+/// let tt_muta = TruthTable::new_muta(1, 1, 1);
 /// ```
 #[derive(Debug)]
 pub struct TruthTable {
