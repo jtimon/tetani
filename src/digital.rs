@@ -18,14 +18,16 @@ pub enum BinOp {
     XNOR,
 }
 
-pub fn binop_2str<'a>(input : &BinOp) -> &'a str {
-    match input {
-        BinOp::AND => "AND",
-        BinOp::OR => "OR",
-        BinOp::XOR => "XOR",
-        BinOp::NAND => "NAND",
-        BinOp::NOR => "NOR",
-        BinOp::XNOR => "XNOR",
+impl BinOp {
+    pub fn to_str<'a>(&self) -> &'a str {
+        match self {
+            BinOp::AND => "AND",
+            BinOp::OR => "OR",
+            BinOp::XOR => "XOR",
+            BinOp::NAND => "NAND",
+            BinOp::NOR => "NOR",
+            BinOp::XNOR => "XNOR",
+        }
     }
 }
 
@@ -486,7 +488,7 @@ impl Individual for BinaryIndividual {
 
     fn print(&self) {
         println!("BinaryIndividual: operation_type: {}, in_size: {}, out_size: {}, in_cardinality: {}",
-                 binop_2str(&self.operation_type),
+                 self.operation_type.to_str(),
                  self.input_size(),
                  self.output_size(),
                  self.in_cardinality(),

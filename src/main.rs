@@ -5,7 +5,6 @@ use tetani::digital::{
     ImitationTask,
     ProgrammableLogicArray,
     TruthTable,
-    binop_2str,
     u32_2binop,
 };
 use tetani::genetic::{
@@ -28,7 +27,7 @@ fn main() {
     println!("----------------------------------------------------------");
     let bi = BinaryIndividual::new(operation_type.clone(), vector_size * 2);
     let bin_task = ImitationTask::new(bi);
-    println!("Your choice was {} bits and operation {}. Max generation: {}", vector_size, binop_2str(&operation_type), max_generation);
+    println!("Your choice was {} bits and operation {}. Max generation: {}", vector_size, operation_type.to_str(), max_generation);
     println!("MAX  fitness: {}", bin_task.max_fitness());
     let input_len = vector_size * 2;
 
