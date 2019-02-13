@@ -2,11 +2,11 @@
 use tetani::digital::{
     BinOp,
     BinaryIndividual,
-    ImitationTask,
     ProgrammableLogicArray,
     TruthTable,
 };
 use tetani::genetic::{
+    ImitationTask,
     Individual,
     Population,
     Task,
