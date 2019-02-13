@@ -33,12 +33,13 @@ impl<I> RatedIndividual<I>
     }
 }
 
-/// Some data struct ordered by fitness (repeated values are allowed) should replace Vec
+/// A population groups individuals and orders them by their fitness for a given task.
 pub struct Population<I: Individual, T: Task> {
     pub task: T,
     /// TODO This list should be ordered by fitness
+    /// TODO Some data struct ordered by fitness (repeated values are allowed) should replace Vec
     pop: Vec< RatedIndividual<I> >,
-    /// Same initial capacity as pop for now
+    /// Storing a list of unrated individuals temporarely is a perfectly valid way to prepare unrated individuals to be rated in parallel.
     unrated_pop: Vec<I>,
     best_index: usize,
     best_fitness: i32,
