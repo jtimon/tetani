@@ -345,25 +345,6 @@ fn eq_bitvector(bitvector: &Vec<bool>, other: &Vec<bool>) -> bool {
     true
 }
 
-pub fn calculate_result(operation_type : &BinOp, input: &Vec<bool>) -> Vec<bool> {
-    assert_eq!(input.len() % 2, 0);
-    let half_size = input.len() / 2;
-    let mut result: Vec<bool> = Vec::with_capacity(half_size);
-    for i in 0..half_size {
-        result.push(
-            match operation_type {
-                BinOp::AND =>    input[i] && input[i + half_size],
-                BinOp::OR  =>    input[i] || input[i + half_size],
-                BinOp::XOR =>    input[i] != input[i + half_size],
-                BinOp::NOR  => !(input[i] || input[i + half_size]),
-                BinOp::NAND => !(input[i] && input[i + half_size]),
-                BinOp::XNOR =>   input[i] == input[i + half_size],
-            }
-        );
-    }
-    result
-}
-
 pub fn increment_bitvector(bitvector: &mut Vec<bool>) {
     for i in 0..bitvector.len() {
         if !bitvector[i] {
@@ -467,14 +448,30 @@ impl Clone for BinaryIndividual {
 
 impl Individual for BinaryIndividual {
 
-    /// unimplemented! This individual is not supposed to evolve, but only to be imitated others using ImitationTask.
+    /// unimplemented! This individual is not supposed to evolve, but only to be imitated by others using ImitationTask.
     fn mutate(&mut self) {
         unimplemented!();
     }
 
     fn calculate_output(&self, input: &Vec<bool>) -> Vec<bool> {
         assert_eq!(input.len(), self.input_size());
-        calculate_result(&self.operation_type, &input)
+
+        let half_size = input.len() / 2;
+        let mut output: Vec<bool> = Vec::with_capacity(half_size);
+        for i in 0..half_size {
+            output.push(
+                match self.operation_type {
+                    BinOp::AND =>    input[i] && input[i + half_size],
+                    BinOp::OR  =>    input[i] || input[i + half_size],
+                    BinOp::XOR =>    input[i] != input[i + half_size],
+                    BinOp::NOR  => !(input[i] || input[i + half_size]),
+                    BinOp::NAND => !(input[i] && input[i + half_size]),
+                    BinOp::XNOR =>   input[i] == input[i + half_size],
+                }
+            );
+        }
+
+        output
     }
 
     fn print(&self) {
