@@ -24,11 +24,11 @@ fn main() {
     let population_size = 3000;
 
     println!("----------------------------------------------------------");
-    let bi = BinaryIndividual::new(operation_type.clone(), vector_size * 2);
+    let bi = BinaryIndividual::new(operation_type, vector_size * 2);
+    bi.print();
     let bin_task = ImitationTask::new(bi);
-    println!("Your choice was {} bits and operation {}. Max generation: {}", vector_size, operation_type.to_str(), max_generation);
-    println!("MAX  fitness: {}", bin_task.max_fitness());
     let input_len = vector_size * 2;
+    println!("Max fitness: {}, Max generation: {}", bin_task.max_fitness(), max_generation);
 
     println!("----------------------------------------------------------");
     let mut pop_tt : Population<TruthTable, ImitationTask<BinaryIndividual>> = Population::new(bin_task.clone(), population_size);
