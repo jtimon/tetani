@@ -5,4 +5,5 @@
 
 pub mod digital;
 pub mod genetic;
+pub mod neural;
 pub mod ui;
