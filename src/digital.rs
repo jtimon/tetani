@@ -2,10 +2,7 @@
 
 use rand::Rng;
 
-pub use crate::genetic::{
-    Individual,
-    Task,
-};
+pub use crate::genetic::Individual;
 
 /// Basic logic gates. Operations that can be done between two bits.
 #[derive(Clone, PartialEq, Debug)]
@@ -196,6 +193,7 @@ impl ProgrammableLogicArray {
             or_matrix: Vec::with_capacity(out_size),
         };
         let or_column_size = ProgrammableLogicArray::calculate_or_column_size(in_size);
+        // TODO Use closures for things like this
         for _i in 0..out_size {
             pla.or_matrix.push(get_null_bitvector(or_column_size));
         }
