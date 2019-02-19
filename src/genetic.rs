@@ -3,6 +3,7 @@
 use crate::digital::{
     get_null_bitvector,
     increment_bitvector,
+    print_bitvector,
 };
 
 /// Individuals compete for fitness within a Population
@@ -41,8 +42,6 @@ pub struct Population<I: Individual, T: Task> {
     pop: Vec< RatedIndividual<I> >,
     /// Storing a list of unrated individuals temporarely is a perfectly valid way to prepare unrated individuals to be rated in parallel.
     unrated_pop: Vec<I>,
-    best_index: usize,
-    best_fitness: i32,
 }
 
 impl<I, T> Population<I, T>
@@ -55,15 +54,6 @@ impl<I, T> Population<I, T>
             task,
             pop,
             unrated_pop,
-            best_fitness: -1000,
-            best_index: 0,
-        }
-    }
-
-    fn update_best(&mut self, new_fitness: i32) {
-        if new_fitness > self.best_fitness {
-            self.best_fitness = new_fitness;
-            self.best_index = self.pop.len();
         }
     }
 
@@ -72,16 +62,16 @@ impl<I, T> Population<I, T>
     }
 
     pub fn best_fitness(&self) -> i32 {
-        self.best_fitness
+        self.pop[0].fitness
     }
 
     pub fn best(&self) -> &I {
-        &self.pop[self.best_index].indi
+        &self.pop[0].indi
     }
 
     fn add_rated_individual(&mut self, indi: RatedIndividual<I>) {
-        self.update_best(indi.fitness);
         self.pop.push(indi);
+        self.pop.sort_by_key(|indi| std::cmp::Reverse(indi.fitness));
     }
 
     pub fn add_unrated_individual(&mut self, indi: I) {
@@ -102,25 +92,19 @@ impl<I, T> Population<I, T>
     pub fn learn_task(&mut self, max_generation: usize) {
         while self.best_fitness() < self.task.max_fitness() && self.pop.len() < max_generation {
             self.next_generation();
+            self.print();
         }
     }
 
     pub fn rate_unrated_individuals(&mut self) {
-        let mut new_best = self.best_fitness();
-        let mut new_best_index = self.best_index;
         for indi in self.unrated_pop.iter() {
             let fitness = self.task.calculate_fitness(indi);
-            if fitness > new_best {
-                new_best = fitness;
-                new_best_index = self.pop.len();
-            }
             self.pop.push(RatedIndividual{
                 indi: indi.clone(),
                 fitness,
             });
         }
-        self.best_fitness = new_best;
-        self.best_index = new_best_index;
+        self.pop.sort_by_key(|indi| std::cmp::Reverse(indi.fitness));
         self.unrated_pop.clear();
     }
 
