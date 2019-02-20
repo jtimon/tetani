@@ -3,7 +3,7 @@
 use crate::digital::{
     get_null_bitvector,
     increment_bitvector,
-    print_bitvector,
+    // print_bitvector,
 };
 
 /// Individuals compete for fitness within a Population
@@ -42,6 +42,8 @@ pub struct Population<I: Individual, T: Task> {
     pop: Vec< RatedIndividual<I> >,
     /// Storing a list of unrated individuals temporarely is a perfectly valid way to prepare unrated individuals to be rated in parallel.
     unrated_pop: Vec<I>,
+    /// Number of individuals selected by truncation per generation
+    num_selection_truncation: usize,
 }
 
 impl<I, T> Population<I, T>
@@ -54,11 +56,16 @@ impl<I, T> Population<I, T>
             task,
             pop,
             unrated_pop,
+            num_selection_truncation: 1,
         }
     }
 
     pub fn len(&self) -> usize {
         self.pop.len()
+    }
+
+    pub fn set_num_selection_truncation(&mut self, num: usize) {
+        self.num_selection_truncation = num;
     }
 
     pub fn best_fitness(&self) -> i32 {
@@ -83,16 +90,28 @@ impl<I, T> Population<I, T>
         self.add_rated_individual(RatedIndividual{indi, fitness});
     }
 
+    fn selection_truncation(&self) -> Vec<I> {
+        assert!(self.pop.len() >= self.num_selection_truncation);
+        let mut selected = Vec::with_capacity(self.num_selection_truncation);
+        for i in 0..self.num_selection_truncation {
+            selected.push(self.pop[i].indi.clone());
+        }
+        selected
+    }
+
     pub fn next_generation(&mut self) {
-        let mut mutant = self.best().clone();
-        mutant.mutate();
-        self.add_and_rate_individual(mutant);
+        let mut selected = self.selection_truncation();
+        for i in 0..selected.len() {
+            selected[i].mutate();
+            // TODO This additional clone is redundant
+            self.add_and_rate_individual(selected[i].clone());
+        }
     }
 
     pub fn learn_task(&mut self, max_generation: usize) {
         while self.best_fitness() < self.task.max_fitness() && self.pop.len() < max_generation {
             self.next_generation();
-            self.print();
+            // self.print();
         }
     }
 
