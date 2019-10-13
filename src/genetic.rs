@@ -118,14 +118,14 @@ impl<I, T> Population<I, T>
     pub fn rate_unrated_individuals(&mut self) {
         for indi in self.unrated_pop.iter() {
             let cloned = indi.clone();
-            let fitness = self.task.calculate_fitness(indi);
-            self.pop.push(RatedIndividual{
-                indi: cloned,
-                fitness,
-            });
-            // self.add_and_rate_individual(cloned);
+            // let fitness = self.task.calculate_fitness(indi);
+            // self.pop.push(RatedIndividual{
+            //     indi: cloned,
+            //     fitness,
+            // });
+            self.add_and_rate_individual(cloned);
         }
-        self.pop.sort_by_key(|indi| std::cmp::Reverse(indi.fitness));
+        // self.pop.sort_by_key(|indi| std::cmp::Reverse(indi.fitness));
         self.unrated_pop.clear();
     }
 
