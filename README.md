@@ -1,11 +1,7 @@
 # Tetani Bioinspired Rust Library
 
 Tetani is a library written in Rust and implementing several
-bioinspired algorithms such as genetic algorithms and genetic
-algorithms.
-
-Yeah, sorry, only genetic algorithms for now, but neural networks and
-cellular automata planned too.
+bioinspired algorithms such as genetic algorithms, neural networks or cellular automata.
 
 The name was inspired by [Clostridium tetani], bacterium causative of
 [tetanus] that can live, among other places, in rust.
@@ -18,7 +14,8 @@ and documented mostly in Spanish.
 This starts as a pet project to learn the Rust language and probably
 nobody will want to depend on it for their own projects. But, who
 knows? Perhaps some day in the future most people playing with rust will
-get tetani.
+get tetani due to them getting artistic thanks to vaccines or
+something else.
 
 [Clostridium tetani]: https://en.wikipedia.org/wiki/Clostridium_tetani
 
