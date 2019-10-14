@@ -106,6 +106,7 @@ fn bitvec2minterm_str(and_row: &Vec<bool>) -> String {
     to_return
 }
 
+#[allow(dead_code)]
 fn bitvec2maxterm(and_row: &Vec<bool>) -> String {
     let mut to_return = String::new();
     to_return.push_str("(");
@@ -319,6 +320,7 @@ impl Individual for ProgrammableLogicArray {
 }
 
 // returns true if all active bits in bitvector are also active in other or false otherwise
+#[allow(dead_code)]
 fn compare_and(bitvector: &Vec<bool>, other: &Vec<bool>) -> bool {
     assert_eq!(bitvector.len(), other.len());
     let mut to_return = false;
